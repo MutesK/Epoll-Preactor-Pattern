@@ -8,7 +8,7 @@ class ContextProcessor final : public EpollContextImpl::BaseContextProcessor
 private:
 	int _WorkerIndex;
 public:
-	ContextProcessor(int WorkerIndex, EpollContextImpl& Context)
+	ContextProcessor(int WorkerIndex, EpollContextImpl* Context)
 		:BaseContextProcessor(Context), _WorkerIndex(WorkerIndex)
 	{
 	}
@@ -49,7 +49,7 @@ private:
 				if (Ptr == nullptr)
 					continue;
 
-				_Context._CompletionCallbackPtr(_WorkerIndex, Ptr->transfferredBytes, Ptr);
+				_Context._CompletionCallbackPtr->CallBack(_WorkerIndex, Ptr->transfferredBytes, Ptr);
 				delete Ptr;
 			}
 		}
@@ -61,7 +61,7 @@ private:
 class MainContextProcessor final : public EpollContextImpl::BaseContextProcessor
 {
 public:
-	MainContextProcessor(EpollContextImpl& Context)
+	MainContextProcessor(EpollContextImpl* Context)
 		:BaseContextProcessor(Context)
 	{
 	}
@@ -118,7 +118,7 @@ private:
 				{
 					Descriptor desript = Ptr->data.fd;
 
-					int32_t transfferedBytes = read(desript, Ptr->contextBuffer, Ptr->bufferlength);
+					auto transfferedBytes = read(desript, Ptr->contextBuffer, Ptr->bufferlength);
 
 					Ptr->transfferredBytes = transfferedBytes;
 
@@ -159,9 +159,13 @@ void EpollContextImpl::RegisterDescriptor(const Descriptor descriptor)
 	_MainProcessor->RegisterDescriptor(descriptor);
 }
 
+void EpollContextImpl::Stop()
+{
+}
+
 void EpollContextImpl::Post(const BaseContextUnitPtr pContext)
 {
-	uint32_t MaxIndex = _WorkerProcessor.size();
+	auto MaxIndex = _WorkerProcessor.size();
 	static std::atomic_uint32_t RoundRobinIndex;
 
 	_WorkerProcessor[RoundRobinIndex]->EnqueueCompletedContext(pContext);

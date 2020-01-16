@@ -1,20 +1,22 @@
 #pragma once
 
-using IOCompleteCallbackPtr = void (*)(const uint32_t, const uint32_t,
-	BaseContextUnitPtr);
+class IOCompleteionCallBack;
+using IOCompleteCallbackPtr = std::shared_ptr<IOCompleteionCallBack>;
 
-using IOEtcErrorCallbackPtr = void (*)(const uint32_t,
-	BaseContextUnitPtr);
+class IOEtcErrorCallBack;
+using IOEtcErrorCallbackPtr = std::shared_ptr<IOEtcErrorCallBack>;
 
 class IOContextImpl abstract
 {
 	friend class IOContext;
+public:
+	virtual ~IOContextImpl();
 protected:
 	Descriptor		_contextHandle;
 	uint32_t		_timeout;
 
 	IOContextImpl();
-	virtual ~IOContextImpl();
+
 
 	IOCompleteCallbackPtr _CompletionCallbackPtr;
 	IOEtcErrorCallbackPtr _ErrorCallbackPtr;

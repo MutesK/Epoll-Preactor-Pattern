@@ -1,26 +1,19 @@
 #include "Precompile.h"
-#include "IOContextImpl.h"
 #include "IOContext.h"
 #include "EpollContextImpl.h"
 
+
+
+
 IOContext::IOContext(const uint32_t numOfWorker, const uint32_t timeout)
 {
-	auto IOCompletionCallback = [&](const uint32_t workerIndex,
-		BaseContextUnitPtr Ptr, const uint32_t TransfferedBytes)
-	{
-		this->IOComplete(workerIndex, Ptr, TransfferedBytes);
-	};
-
-	auto IOErrorCallback = [&](const uint32_t workerIndex,
-		BaseContextUnitPtr Ptr)
-	{
-		this->IOError(workerIndex, Ptr);
-	};
-
 #ifdef WIN32
 #else
-	_ContextImpl = make_unique<EpollContextImpl>(numOfWorker,
-		timeout, IOCompletionCallback, IOErrorCallback);
+	_ContextImpl = std::unique_ptr<EpollContextImpl>(new EpollContextImpl(numOfWorker));
+
+	_ContextImpl->Initialize(timeout,
+		std::make_shared<IOCompleteionCallBack>(this),
+		std::make_shared<IOEtcErrorCallBack>(this));
 #endif
 }
 
@@ -32,4 +25,25 @@ IOContext::~IOContext()
 void IOContext::RegisterDescriptor(const Descriptor destrip)
 {
 	_ContextImpl->RegisterDescriptor(destrip);
+}
+
+
+IOCompleteionCallBack::IOCompleteionCallBack(IOContext* Context)
+	:_Context(Context)
+{
+}
+
+void IOCompleteionCallBack::CallBack(const uint32_t WorkerIndex, const std::size_t& TransfferedBytes, BaseContextUnitPtr Ptr)
+{
+	_Context->IOComplete(WorkerIndex, Ptr, TransfferedBytes);
+}
+
+IOEtcErrorCallBack::IOEtcErrorCallBack(IOContext* Context)
+	:_Context(Context)
+{
+}
+
+void IOEtcErrorCallBack::Callback(const uint32_t WorkerIndex, BaseContextUnitPtr Ptr)
+{
+	_Context->IOError(WorkerIndex, Ptr);
 }

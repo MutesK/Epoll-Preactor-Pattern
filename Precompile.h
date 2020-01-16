@@ -30,9 +30,12 @@ using Descriptor = HANDLE;
 using Descriptor = int32_t;
 
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
+namespace std
 {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
 }
 #endif

@@ -2,6 +2,7 @@
 #include "IOContext.h"
 #include "IOContextImpl.h"
 
+
 IOContextImpl::IOContextImpl()
 	:_CompletionCallbackPtr(nullptr), _ErrorCallbackPtr(nullptr)
 {
@@ -9,7 +10,6 @@ IOContextImpl::IOContextImpl()
 
 IOContextImpl::~IOContextImpl()
 {
-	Stop();
 }
 
 void IOContextImpl::Initialize(const uint32_t timeout,

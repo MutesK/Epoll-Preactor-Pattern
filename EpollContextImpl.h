@@ -14,10 +14,10 @@ class EpollContextImpl : public IOContextImpl
 		EpollContextImpl& _Context;
 		std::queue<BaseContextUnitPtr>  _ProcesWaitQueue;
 
-		BaseContextProcessor(EpollContextImpl& Context)
-			:_Context(Context)
+		BaseContextProcessor(EpollContextImpl* Context)
+			:_Context(*Context)
 		{
-			_processor = std::thread(std::mem_fn(&BaseContextProcessor::Process));
+			_processor = std::thread(std::mem_fn(&BaseContextProcessor::Process), this);
 		}
 
 	public:
