@@ -1,0 +1,1 @@
+/bin/g++-6  -g  -rdynamic CMakeFiles/Epoll-Preactor-Pattern.dir/main.cpp.o  -o Epoll-Preactor-Pattern 
